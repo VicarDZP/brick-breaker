@@ -1,19 +1,18 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>水果迷宫打砖块</title>
+    <meta name="description" content="免费的水果迷宫打砖块小游戏，也是一份适合 Java 初学者阅读的编程学习案例。">
+    <title>水果迷宫打砖块 - 免费在线小游戏</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <main class="game-container">
         <header class="game-header">
             <div>
                 <h1>🍉 水果迷宫打砖块</h1>
-                <p>击碎砖块，收集水果，挑战全部五个关卡！</p>
+                <p>免费游玩 · 五个关卡 · 也可以边玩边学习编程</p>
             </div>
         </header>
 
@@ -42,6 +41,82 @@
                 <p>击碎当前关卡的全部砖块，即可进入下一关。</p>
             </div>
         </section>
+
+        <section class="learning-section">
+            <div class="learning-heading">
+                <span class="learning-tag">编程入门</span>
+                <h2>从这个小游戏认识编程</h2>
+                <p>如果你正在学习 Java，可以先从下面这段小程序认识游戏中常见的编程概念。</p>
+            </div>
+
+            <div class="learning-note">
+                <strong>先分清 Java 和 JavaScript</strong>
+                <p>这个网页小游戏是用 HTML、CSS 和 JavaScript 编写的，浏览器运行的是 JavaScript。Java 和 JavaScript 是两种不同的编程语言。下面的代码是专门给 Java 初学者看的控制台入门示例，用来理解游戏中的得分和砖块逻辑，并不是网页游戏本身的源代码。</p>
+            </div>
+
+            <h3>1. Java 入门示例：击碎砖块并计算分数</h3>
+            <p class="learning-description">这段代码模拟击碎 5 块砖块：每击碎一块加 10 分，最后输出总分。可以复制到 Java IDE 中，保存为 <code>BeginnerGame.java</code> 后运行。</p>
+            <pre class="code-example"><code>public class BeginnerGame {
+
+    public static void main(String[] args) {
+        // 变量：记录当前分数
+        int score = 0;
+
+        // 数组：1 表示砖块还在，0 表示已经击碎
+        int[] bricks = {1, 1, 1, 1, 1};
+
+        // 循环：依次检查每一块砖
+        for (int i = 0; i &lt; bricks.length; i++) {
+
+            // 判断：如果砖块还存在
+            if (bricks[i] == 1) {
+                score = score + 10;
+                bricks[i] = 0;
+                System.out.println("击碎第 " + (i + 1) + " 块砖！");
+            }
+        }
+
+        // 输出最终结果
+        System.out.println("游戏得分：" + score);
+    }
+}</code></pre>
+
+            <h3>2. 这段代码用到了哪些 Java 知识？</h3>
+            <div class="concept-grid">
+                <article class="concept-card">
+                    <h4>变量</h4>
+                    <code>int score = 0;</code>
+                    <p>用变量保存会变化的数据，例如分数、生命值和当前关卡。</p>
+                </article>
+                <article class="concept-card">
+                    <h4>数组</h4>
+                    <code>int[] bricks</code>
+                    <p>用一组数据表示多块砖。数组下标从 0 开始。</p>
+                </article>
+                <article class="concept-card">
+                    <h4>循环</h4>
+                    <code>for (...)</code>
+                    <p>重复执行相同操作，例如逐个检查所有砖块。</p>
+                </article>
+                <article class="concept-card">
+                    <h4>条件判断</h4>
+                    <code>if (...)</code>
+                    <p>根据条件决定是否执行，例如只给尚未击碎的砖块加分。</p>
+                </article>
+            </div>
+
+            <h3>3. 再看看真实游戏代码在哪里</h3>
+            <ul class="file-list">
+                <li><code>index.html</code>：网页结构，放置游戏画布和按钮。</li>
+                <li><code>style.css</code>：控制页面颜色、布局和按钮样式。</li>
+                <li><code>game.js</code>：真正的游戏逻辑，包括小球移动、碰撞检测、计分和关卡切换。</li>
+            </ul>
+            <p class="learning-description">建议学习顺序：先读懂变量和函数，再看数组与循环，最后尝试理解 <code>updateBalls()</code>、<code>checkBrickCollision()</code> 和 <code>destroyBrick()</code> 等游戏函数。可以先修改每块砖的分数，再观察游戏结果。</p>
+        </section>
+
+        <footer class="site-footer">
+            <p>本项目免费开放，适合练习和学习基础编程概念。</p>
+        </footer>
     </main>
 
     <script src="game.js"></script>
