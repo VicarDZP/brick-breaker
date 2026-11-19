@@ -1,0 +1,157 @@
+
+/* 页面基础设置 */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 24px 16px;
+    background: #111827;
+    color: #ffffff;
+    font-family: Arial, "Microsoft YaHei", sans-serif;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 920px;
+    margin: 0 auto;
+}
+
+/* 标题 */
+.game-header {
+    text-align: center;
+    margin-bottom: 22px;
+}
+
+.game-header h1 {
+    margin: 0 0 10px;
+    font-size: 30px;
+}
+
+.game-header p {
+    margin: 0;
+    color: #bdc8dc;
+    font-size: 15px;
+}
+
+/* 游戏面板 */
+.game-panel {
+    padding: 16px;
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+}
+
+/* 工具栏 */
+.game-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.toolbar-tip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    color: #d1d5db;
+    font-size: 13px;
+}
+
+.toolbar-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+button {
+    padding: 9px 15px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+button:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+#restartButton {
+    background: #475569;
+}
+
+#restartButton:hover {
+    background: #64748b;
+}
+
+/* 游戏画布 */
+.canvas-wrapper {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #111827;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #111827;
+    touch-action: none;
+}
+
+/* 底部说明 */
+.game-footer {
+    padding-top: 12px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+.game-footer p {
+    margin: 5px 0;
+}
+
+/* 手机屏幕 */
+@media (max-width: 600px) {
+    body {
+        padding: 12px 6px;
+    }
+
+    .game-header h1 {
+        font-size: 23px;
+    }
+
+    .game-panel {
+        padding: 8px;
+    }
+
+    .game-toolbar {
+        align-items: flex-start;
+    }
+
+    .toolbar-tip {
+        gap: 7px;
+        font-size: 11px;
+    }
+
+    .toolbar-buttons {
+        width: 100%;
+    }
+
+    .toolbar-buttons button {
+        flex: 1;
+    }
+}
