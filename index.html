@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水果迷宫打砖块</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="game-container">
+        <header class="game-header">
+            <div>
+                <h1>🍉 水果迷宫打砖块</h1>
+                <p>击碎砖块，收集水果，挑战全部五个关卡！</p>
+            </div>
+        </header>
+
+        <section class="game-panel">
+            <div class="game-toolbar">
+                <div class="toolbar-tip">
+                    <span>← → 移动挡板</span>
+                    <span>P 暂停 / 继续</span>
+                    <span>空格 开始 / 下一关</span>
+                </div>
+
+                <div class="toolbar-buttons">
+                    <button id="pauseButton" type="button">暂停游戏</button>
+                    <button id="restartButton" type="button">重新开始</button>
+                </div>
+            </div>
+
+            <div class="canvas-wrapper">
+                <canvas id="gameCanvas" width="800" height="680">
+                    你的浏览器不支持 Canvas，请更换浏览器。
+                </canvas>
+            </div>
+
+            <div class="game-footer">
+                <p>接住掉落的水果，获得特殊能力！</p>
+                <p>击碎当前关卡的全部砖块，即可进入下一关。</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="game.js"></script>
+</body>
+</html>
