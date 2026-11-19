@@ -998,3 +998,827 @@ function updateBalls() {
         const ball = balls[i];
 
         // 保存移动前的位置，用于判断阻挡物碰撞方向
+        const oldX = ball.x;
+        const oldY = ball.y;
+
+        // 移动小球
+        ball.x += ball.speedX;
+        ball.y += ball.speedY;
+
+        // 画布左边界
+        if (ball.x - ball.radius < 0) {
+
+            ball.x = ball.radius;
+
+            ball.speedX = Math.abs(ball.speedX);
+        }
+
+        // 画布右边界
+        if (ball.x + ball.radius > canvas.width) {
+
+            ball.x = canvas.width - ball.radius;
+
+            ball.speedX = -Math.abs(ball.speedX);
+        }
+
+        // 画布顶部
+        if (ball.y - ball.radius < 0) {
+
+            ball.y = ball.radius;
+
+            ball.speedY = Math.abs(ball.speedY);
+        }
+
+        // 迷宫墙壁
+        checkChamberCollision(ball);
+
+        // 固定阻挡物
+        if (ball.inside) {
+            checkObstacleCollision(ball, oldX, oldY);
+        }
+
+        // 砖块
+        checkBrickCollision(ball);
+
+        // 挡板
+        checkPaddleCollision(ball);
+
+        // 小球掉出画布
+        if (ball.y - ball.radius > canvas.height) {
+            balls.splice(i, 1);
+        }
+    }
+
+    // 所有小球消失
+    if (
+        balls.length === 0 &&
+        gameState === "playing"
+    ) {
+        loseLife();
+    }
+}
+
+
+// ======================================================
+// 27. 三倍小球
+// ======================================================
+
+function tripleBalls() {
+
+    if (balls.length === 0) {
+        return;
+    }
+
+    const originalBall = balls[0];
+
+    const speed = ballBaseSpeed * 0.8;
+
+    const newBall1 = createBall(
+        originalBall.x,
+        originalBall.y,
+        -speed,
+        -speed,
+        originalBall.inside
+    );
+
+    const newBall2 = createBall(
+        originalBall.x,
+        originalBall.y,
+        speed,
+        -speed,
+        originalBall.inside
+    );
+
+    // 如果正在减速，新球也减速
+    if (effects.slow > 0) {
+
+        newBall1.speedX *= 0.75;
+        newBall1.speedY *= 0.75;
+
+        newBall2.speedX *= 0.75;
+        newBall2.speedY *= 0.75;
+    }
+
+    balls.push(newBall1, newBall2);
+}
+
+
+// ======================================================
+// 28. 激活水果效果
+// ======================================================
+
+function activateFruit(effect) {
+
+    switch (effect) {
+
+        case "triple":
+            tripleBalls();
+            break;
+
+        case "life":
+            lives++;
+            break;
+
+        case "wide":
+            effects.wide = 600;
+            paddle.width = 160;
+            break;
+
+        case "slow":
+            effects.slow = 600;
+
+            for (const ball of balls) {
+                ball.speedX *= 0.75;
+                ball.speedY *= 0.75;
+            }
+            break;
+
+        case "pierce":
+            effects.pierce = 600;
+            break;
+
+        case "bonus":
+            score += 100;
+            break;
+    }
+}
+
+
+// ======================================================
+// 29. 更新水果
+// ======================================================
+
+function updateFruits() {
+
+    for (let i = fruits.length - 1; i >= 0; i--) {
+
+        const fruit = fruits[i];
+
+        fruit.y += fruit.speedY;
+
+        // 接住水果
+        const caught =
+            fruit.x > paddle.x &&
+            fruit.x < paddle.x + paddle.width &&
+            fruit.y + 12 >= paddle.y &&
+            fruit.y <= paddle.y + paddle.height;
+
+        if (caught) {
+
+            activateFruit(fruit.type.effect);
+
+            fruits.splice(i, 1);
+
+            continue;
+        }
+
+        // 水果掉出画布
+        if (fruit.y > canvas.height) {
+            fruits.splice(i, 1);
+        }
+    }
+}
+
+
+// ======================================================
+// 30. 更新道具计时
+// ======================================================
+
+function updateEffects() {
+
+    if (effects.wide > 0) {
+
+        effects.wide--;
+
+        if (effects.wide === 0) {
+            paddle.width = originalPaddleWidth;
+        }
+    }
+
+    if (effects.slow > 0) {
+        effects.slow--;
+    }
+
+    if (effects.pierce > 0) {
+        effects.pierce--;
+    }
+}
+
+
+// ======================================================
+// 31. 更新挡板和游戏
+// ======================================================
+
+function updateGame() {
+
+    if (gameState !== "playing") {
+        return;
+    }
+
+    if (isPaused) {
+        return;
+    }
+
+    updatePaddle();
+
+    updateBalls();
+
+    updateFruits();
+
+    updateEffects();
+}
+
+
+// ======================================================
+// 32. 绘制迷宫墙壁
+// ======================================================
+
+function drawChamber() {
+
+    // 房间背景
+    ctx.fillStyle = "#202b45";
+
+    ctx.fillRect(
+        chamber.x,
+        chamber.y,
+        chamber.width,
+        chamber.height
+    );
+
+    ctx.fillStyle = "#8b9bb4";
+
+    // 左墙
+    ctx.fillRect(
+        chamber.x - 5,
+        chamber.y,
+        5,
+        chamber.height
+    );
+
+    // 右墙
+    ctx.fillRect(
+        chamber.right,
+        chamber.y,
+        5,
+        chamber.height
+    );
+
+    // 顶墙
+    ctx.fillRect(
+        chamber.x,
+        chamber.y - 5,
+        chamber.width,
+        5
+    );
+
+    // 底墙左边
+    ctx.fillRect(
+        chamber.x,
+        chamber.bottom,
+        entrance.x - chamber.x,
+        5
+    );
+
+    // 底墙右边
+    ctx.fillRect(
+        entrance.x + entrance.width,
+        chamber.bottom,
+        chamber.right - entrance.x - entrance.width,
+        5
+    );
+
+    // 入口
+    ctx.fillStyle = "#69db7c";
+
+    ctx.fillRect(
+        entrance.x,
+        chamber.bottom,
+        entrance.width,
+        5
+    );
+
+    // 入口文字
+    ctx.fillStyle = "#69db7c";
+    ctx.font = "12px Arial";
+    ctx.textAlign = "center";
+
+    ctx.fillText(
+        "自由入口",
+        entrance.x + entrance.width / 2,
+        chamber.bottom + 22
+    );
+}
+
+
+// ======================================================
+// 33. 绘制砖块
+// ======================================================
+
+function drawBricks() {
+
+    for (const brick of bricks) {
+
+        if (!brick.alive) {
+            continue;
+        }
+
+        ctx.fillStyle = brick.color;
+
+        ctx.fillRect(
+            brick.x,
+            brick.y,
+            brick.width,
+            brick.height
+        );
+
+        // 高光
+        ctx.fillStyle = "rgba(255,255,255,0.25)";
+
+        ctx.fillRect(
+            brick.x + 3,
+            brick.y + 3,
+            brick.width - 6,
+            4
+        );
+
+        // 边框
+        ctx.strokeStyle = "rgba(0,0,0,0.2)";
+
+        ctx.strokeRect(
+            brick.x,
+            brick.y,
+            brick.width,
+            brick.height
+        );
+    }
+}
+
+
+// ======================================================
+// 34. 绘制固定阻挡物
+// ======================================================
+
+function drawObstacles() {
+
+    for (const obstacle of obstacles) {
+
+        // 阻挡物主体
+        ctx.fillStyle = "#64748b";
+
+        ctx.fillRect(
+            obstacle.x,
+            obstacle.y,
+            obstacle.width,
+            obstacle.height
+        );
+
+        // 高光
+        ctx.fillStyle = "#cbd5e1";
+
+        ctx.fillRect(
+            obstacle.x + 3,
+            obstacle.y + 2,
+            Math.max(0, obstacle.width - 6),
+            3
+        );
+
+        // 边框
+        ctx.strokeStyle = "#e2e8f0";
+
+        ctx.strokeRect(
+            obstacle.x,
+            obstacle.y,
+            obstacle.width,
+            obstacle.height
+        );
+    }
+}
+
+
+// ======================================================
+// 35. 绘制小球
+// ======================================================
+
+function drawBalls() {
+
+    for (const ball of balls) {
+
+        ctx.beginPath();
+
+        ctx.arc(
+            ball.x,
+            ball.y,
+            ball.radius,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.shadowColor = "#ffffff";
+        ctx.shadowBlur = 10;
+
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        ctx.closePath();
+    }
+}
+
+
+// ======================================================
+// 36. 绘制挡板
+// ======================================================
+
+function drawPaddle() {
+
+    ctx.fillStyle = "#74c0fc";
+
+    ctx.fillRect(
+        paddle.x,
+        paddle.y,
+        paddle.width,
+        paddle.height
+    );
+
+    ctx.fillStyle = "#d0ebff";
+
+    ctx.fillRect(
+        paddle.x + 5,
+        paddle.y + 3,
+        paddle.width - 10,
+        4
+    );
+}
+
+
+// ======================================================
+// 37. 绘制水果
+// ======================================================
+
+function drawFruits() {
+
+    ctx.font = "24px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    for (const fruit of fruits) {
+
+        ctx.fillText(
+            fruit.type.emoji,
+            fruit.x,
+            fruit.y
+        );
+    }
+}
+
+
+// ======================================================
+// 38. 绘制游戏信息
+// ======================================================
+
+function drawInfo() {
+
+    ctx.fillStyle = "#ffffff";
+
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+
+    ctx.font = "19px Arial";
+
+    ctx.fillText("得分：" + score, 70, 525);
+
+    ctx.fillText("生命：" + lives, 240, 525);
+
+    ctx.fillText(
+        "关卡：" + level + "/" + maxLevel,
+        400,
+        525
+    );
+
+    // 当前关卡名称
+    ctx.font = "15px Arial";
+
+    ctx.fillStyle = "#ffd43b";
+
+    ctx.fillText(
+        levelSettings[level - 1].name,
+        70,
+        555
+    );
+
+    // 当前能力
+    const activeEffects = [];
+
+    if (effects.wide > 0) {
+        activeEffects.push("挡板加宽");
+    }
+
+    if (effects.slow > 0) {
+        activeEffects.push("小球减速");
+    }
+
+    if (effects.pierce > 0) {
+        activeEffects.push("穿透砖块");
+    }
+
+    ctx.fillStyle = "#ffffff";
+
+    ctx.fillText(
+        "当前能力：" + (activeEffects.join("、") || "无"),
+        240,
+        555
+    );
+
+    // 剩余砖块
+    const remainingBricks = bricks.filter(
+        brick => brick.alive
+    ).length;
+
+    ctx.fillStyle = "#a5b4fc";
+
+    ctx.fillText(
+        "剩余砖块：" + remainingBricks,
+        70,
+        585
+    );
+
+    ctx.fillText(
+        "按 P 键暂停或继续",
+        240,
+        585
+    );
+}
+
+
+// ======================================================
+// 39. 绘制游戏提示
+// ======================================================
+
+function drawGameMessage() {
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // 等待开始
+    if (gameState === "ready") {
+
+        ctx.fillStyle = "rgba(0,0,0,0.55)";
+
+        ctx.fillRect(
+            150,
+            270,
+            500,
+            100
+        );
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.font = "25px Arial";
+
+        ctx.fillText(
+            "点击画面或按空格开始",
+            canvas.width / 2,
+            310
+        );
+
+        ctx.font = "16px Arial";
+
+        ctx.fillText(
+            "控制挡板接住水果，不要让小球掉落！",
+            canvas.width / 2,
+            345
+        );
+    }
+
+    // 暂停
+    if (isPaused) {
+
+        ctx.fillStyle = "rgba(0,0,0,0.75)";
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.font = "42px Arial";
+
+        ctx.fillText(
+            "游戏已暂停",
+            canvas.width / 2,
+            canvas.height / 2 - 20
+        );
+
+        ctx.font = "22px Arial";
+
+        ctx.fillText(
+            "按 P 键或点击继续游戏",
+            canvas.width / 2,
+            canvas.height / 2 + 35
+        );
+    }
+
+    // 当前关卡完成
+    if (gameState === "levelComplete") {
+
+        ctx.fillStyle = "rgba(0,0,0,0.75)";
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        ctx.fillStyle = "#69db7c";
+
+        ctx.font = "40px Arial";
+
+        ctx.fillText(
+            "第 " + level + " 关完成！",
+            canvas.width / 2,
+            canvas.height / 2 - 35
+        );
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.font = "22px Arial";
+
+        ctx.fillText(
+            "点击画面或按空格进入下一关",
+            canvas.width / 2,
+            canvas.height / 2 + 25
+        );
+    }
+
+    // 全部通关
+    if (gameState === "won") {
+
+        ctx.fillStyle = "rgba(0,0,0,0.8)";
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        ctx.fillStyle = "#ffd43b";
+
+        ctx.font = "42px Arial";
+
+        ctx.fillText(
+            "恭喜全部通关！",
+            canvas.width / 2,
+            canvas.height / 2 - 45
+        );
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.font = "25px Arial";
+
+        ctx.fillText(
+            "最终得分：" + score,
+            canvas.width / 2,
+            canvas.height / 2 + 10
+        );
+
+        ctx.font = "19px Arial";
+
+        ctx.fillText(
+            "点击画面重新开始",
+            canvas.width / 2,
+            canvas.height / 2 + 60
+        );
+    }
+
+    // 游戏失败
+    if (gameState === "lost") {
+
+        ctx.fillStyle = "rgba(0,0,0,0.8)";
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        ctx.fillStyle = "#ff6b6b";
+
+        ctx.font = "45px Arial";
+
+        ctx.fillText(
+            "游戏结束",
+            canvas.width / 2,
+            canvas.height / 2 - 45
+        );
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.font = "25px Arial";
+
+        ctx.fillText(
+            "最终得分：" + score,
+            canvas.width / 2,
+            canvas.height / 2 + 10
+        );
+
+        ctx.font = "19px Arial";
+
+        ctx.fillText(
+            "点击画面重新开始",
+            canvas.width / 2,
+            canvas.height / 2 + 60
+        );
+    }
+}
+
+
+// ======================================================
+// 40. 绘制整个游戏
+// ======================================================
+
+function drawGame() {
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    // 背景
+    ctx.fillStyle = "#111827";
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    drawChamber();
+
+    drawBricks();
+
+    drawObstacles();
+
+    drawBalls();
+
+    drawPaddle();
+
+    drawFruits();
+
+    drawInfo();
+
+    drawGameMessage();
+}
+
+
+// ======================================================
+// 41. 游戏主循环
+// ======================================================
+
+function gameLoop() {
+
+    updateGame();
+
+    drawGame();
+
+    requestAnimationFrame(gameLoop);
+}
+
+
+// ======================================================
+// 42. 初始化游戏
+// ======================================================
+
+function initGame() {
+
+    setLevelDifficulty();
+
+    createBricks();
+
+    createObstacles();
+
+    createWaitingBall();
+
+    paddle.x = canvas.width / 2 - paddle.width / 2;
+
+    updatePauseButton();
+
+    gameLoop();
+}
+
+
+// ======================================================
+// 43. 启动游戏
+// ======================================================
+
+initGame();
